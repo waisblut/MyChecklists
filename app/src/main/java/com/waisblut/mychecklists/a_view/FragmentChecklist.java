@@ -8,7 +8,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.waisblut.mychecklists.R;
-import com.waisblut.mychecklists.b_model.AdapterChecklist;
 import com.waisblut.mychecklists.b_model.Checklist;
 import com.waisblut.mychecklists.b_model.ChecklistItem;
 import com.waisblut.mychecklists.c_data.DSChecklist;

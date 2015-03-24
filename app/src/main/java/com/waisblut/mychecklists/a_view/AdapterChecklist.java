@@ -1,4 +1,4 @@
-package com.waisblut.mychecklists.b_model;
+package com.waisblut.mychecklists.a_view;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.waisblut.mychecklists.R;
+import com.waisblut.mychecklists.b_model.Checklist;
 
 public final class AdapterChecklist
         extends ArrayAdapter<Checklist>
