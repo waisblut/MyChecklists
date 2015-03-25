@@ -13,12 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MyDataSource {
+    protected String tableName = "";
     MyOpenHelper openHelper;
     SQLiteDatabase database = null;
     Context context = null;
-
-    protected String tableName = "";
-
     List<String> columns = new ArrayList<String>();
     List<String> columnsType = new ArrayList<String>();
     List<String> columnsExtra = new ArrayList<String>();

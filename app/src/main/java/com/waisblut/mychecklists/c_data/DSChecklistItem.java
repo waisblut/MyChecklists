@@ -54,12 +54,9 @@ public class DSChecklistItem
         LinkedList<ChecklistItem> list = new LinkedList<>();
         Cursor c = super.getItem(id, CHECKLISTID);
 
-        if (c != null)
-        {
-            if (c.getCount() > 0)
-            {
-                while (c.moveToNext())
-                {
+        if (c != null) {
+            if (c.getCount() > 0) {
+                while (c.moveToNext()) {
                     list.add(createChecklistItem(c));
                 }
 
@@ -72,8 +69,7 @@ public class DSChecklistItem
     public ChecklistItem createChecklistItem(Cursor c) {
         ChecklistItem item = null;
 
-        if (c.getCount() > 0)
-        {
+        if (c.getCount() > 0) {
             item = new ChecklistItem();
             item.setId(c.getLong(c.getColumnIndex(ID)));
             item.add(c.getString(c.getColumnIndex(NAME)));

@@ -12,15 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 public class MyOpenHelper
-        extends SQLiteOpenHelper
-{
+        extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "parkingmanager.db";
     private static final int DATABASE_VERSION = 1;
     private final String DROP_TABLE = "DROP TABLE IF EXISTS ";
     private LinkedHashMap<String, String> lstMyTables;
 
-    public MyOpenHelper(Context context)
-    {
+    public MyOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
         lstMyTables = new LinkedHashMap<>();
@@ -33,35 +31,28 @@ public class MyOpenHelper
                         String tableName,
                         List<String> columns,
                         List<String> columnsType,
-                        List<String> columnsConstraint)
-    {
+                        List<String> columnsConstraint) {
 
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db)
-    {
-        for (Map.Entry<String, String> m : lstMyTables.entrySet())
-        {
-            try
-            {
+    public void onCreate(SQLiteDatabase db) {
+        for (Map.Entry<String, String> m : lstMyTables.entrySet()) {
+            try {
                 db.execSQL(m.getValue());
                 Logger.log('i', Logger.getCreatedMessage(m.getKey()));
             }
-            catch (SQLException e)
-            {
+            catch (SQLException e) {
                 Logger.log('e', Logger.TableCreationError(m.getKey()) + " - " + e.getMessage());
             }
         }
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
-    {
-        for (Map.Entry<String, String> m : lstMyTables.entrySet())
-        {
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        for (Map.Entry<String, String> m : lstMyTables.entrySet()) {
             db.execSQL(DROP_TABLE + m.getKey());
         }
 
@@ -70,16 +61,14 @@ public class MyOpenHelper
         Logger.log('i', Logger.getUpgradedMessage());
     }
 
-    private String createTable(MyDataSource ds)
-    {
+    private String createTable(MyDataSource ds) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("CREATE TABLE ");
         sb.append(ds.tableName);
         sb.append(" (\n");
 
-        for (int i = 0; i < ds.columns.size(); i++)
-        {
+        for (int i = 0; i < ds.columns.size(); i++) {
             String constraint = ds.columnsExtra.get(i) == null ? "" : ds.columnsExtra.get(i);
             sb.append(ds.columns.get(i))
               .append(" ")
@@ -89,8 +78,7 @@ public class MyOpenHelper
               .append(", \n");
         }
 
-        for (int i = 0; i < ds.columnsConst.size(); i++)
-        {
+        for (int i = 0; i < ds.columnsConst.size(); i++) {
             sb.append(ds.columnsConst.get(i))
               .append(", \n");
         }

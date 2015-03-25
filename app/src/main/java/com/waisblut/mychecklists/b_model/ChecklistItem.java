@@ -32,12 +32,11 @@ public class ChecklistItem {
         return state;
     }
 
-    public void add(String name) {
-        this.name = name;
-    }
-
-
     public void setState(int state) {
         this.state = state;
+    }
+
+    public void add(String name) {
+        this.name = name;
     }
 }

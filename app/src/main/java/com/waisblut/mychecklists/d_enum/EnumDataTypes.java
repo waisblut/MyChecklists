@@ -9,11 +9,11 @@ public enum EnumDataTypes {
 
     protected String code;
 
-    public String getCode() {
-        return this.code;
-    }
-
     EnumDataTypes(String s) {
         this.code = s;
+    }
+
+    public String getCode() {
+        return this.code;
     }
 }

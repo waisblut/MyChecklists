@@ -11,20 +11,17 @@ import com.waisblut.mychecklists.R;
 import com.waisblut.mychecklists.b_model.Checklist;
 
 public final class AdapterChecklist
-        extends ArrayAdapter<Checklist>
-{
+        extends ArrayAdapter<Checklist> {
 
     private final int myResource;
 
-    public AdapterChecklist(final Context context, final int resource)
-    {
+    public AdapterChecklist(final Context context, final int resource) {
         super(context, 0);
         this.myResource = resource;
     }
 
     @Override
-    public View getView(final int position, final View convertView, final ViewGroup parent)
-    {
+    public View getView(final int position, final View convertView, final ViewGroup parent) {
 
         // We need to get the best view (re-used if possible) and then
         // retrieve its corresponding ViewHolder, which optimizes lookup efficiency
@@ -39,37 +36,32 @@ public final class AdapterChecklist
         return view;
     }
 
-    private View getWorkingView(final View convertView)
-    {
+    private View getWorkingView(final View convertView) {
         // The workingView is basically just the convertView re-used if possible
         // or inflated new if not possible
         View workingView = null;
 
-        if (null == convertView)
-        {
+        if (null == convertView) {
             final Context context = getContext();
             final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             workingView = inflater.inflate(myResource, null);
         }
-        else
-        {
+        else {
             workingView = convertView;
         }
 
         return workingView;
     }
 
-    private ViewHolder getViewHolder(final View workingView)
-    {
+    private ViewHolder getViewHolder(final View workingView) {
         // The viewHolder allows us to avoid re-looking up view references
         // Since views are recycled, these references will never change
         final Object tag = workingView.getTag();
         ViewHolder viewHolder = null;
 
 
-        if (null == tag || !(tag instanceof ViewHolder))
-        {
+        if (null == tag || !(tag instanceof ViewHolder)) {
             viewHolder = new ViewHolder();
 
             viewHolder.titleView = (TextView) workingView.findViewById(R.id.txtTitle);
@@ -77,8 +69,7 @@ public final class AdapterChecklist
 
             workingView.setTag(viewHolder);
         }
-        else
-        {
+        else {
             viewHolder = (ViewHolder) tag;
         }
 
@@ -89,8 +80,7 @@ public final class AdapterChecklist
      * ViewHolder allows us to avoid re-looking up view references
      * Since views are recycled, these references will never change
      */
-    private static class ViewHolder
-    {
+    private static class ViewHolder {
         public TextView titleView;
         public TextView subTitleView;
     }

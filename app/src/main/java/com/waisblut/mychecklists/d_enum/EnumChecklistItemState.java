@@ -8,11 +8,12 @@ public enum EnumChecklistItemState {
     NOT_OK(4);
 
     protected int code;
-    public int getCode() {
-        return this.code;
-    }
 
     EnumChecklistItemState(int i) {
         this.code = i;
+    }
+
+    public int getCode() {
+        return this.code;
     }
 }

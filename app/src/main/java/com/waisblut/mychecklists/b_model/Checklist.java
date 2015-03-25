@@ -13,7 +13,7 @@ public class Checklist {
 
     public Checklist(long id, String name, LinkedList<ChecklistItem> items) {
         this.id = id;
-        this.name=name;
+        this.name = name;
         this.list = items;
     }
 

@@ -17,17 +17,18 @@ import java.util.LinkedList;
 
 
 public class FragmentChecklist
-        extends ListFragment
-{
+        extends ListFragment {
     private Checklist mCheckList;
     private DSChecklist dsChecklist;
     private DSChecklistItem dsChecklistItem;
     private OnFragmentInteractionListener mListener;
     private ListView mListView;
 
+    public FragmentChecklist() {
+    }
+
     // TODO: Rename and change types of parameters
-    public static FragmentChecklist newInstance(String param1, String param2)
-    {
+    public static FragmentChecklist newInstance(String param1, String param2) {
         FragmentChecklist fragment = new FragmentChecklist();
         //        Bundle args = new Bundle();
         //        args.putString(ARG_PARAM1, param1);
@@ -36,17 +37,11 @@ public class FragmentChecklist
         return fragment;
     }
 
-    public FragmentChecklist()
-    {
-    }
-
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null)
-        {
+        if (getArguments() != null) {
             //            mParam1 = getArguments().getString(ARG_PARAM1);
             //            mParam2 = getArguments().getString(ARG_PARAM2);
         }
@@ -59,34 +54,28 @@ public class FragmentChecklist
     }
 
     @Override
-    public void onAttach(Activity activity)
-    {
+    public void onAttach(Activity activity) {
         super.onAttach(activity);
-        try
-        {
+        try {
             mListener = (OnFragmentInteractionListener) activity;
         }
-        catch (ClassCastException e)
-        {
+        catch (ClassCastException e) {
             throw new ClassCastException(
                     activity.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 
     @Override
-    public void onDetach()
-    {
+    public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id)
-    {
+    public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        if (null != mListener)
-        {
+        if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             mListener.onFragmentInteraction(dsChecklist.getAllChecklists()
@@ -96,15 +85,15 @@ public class FragmentChecklist
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState)
-    {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
-        {
+        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
-            {
+            public boolean onItemLongClick(AdapterView<?> parent,
+                                           View view,
+                                           int position,
+                                           long id) {
                 Checklist chk = (Checklist) getListView().getItemAtPosition(position);
 
                 return true;
@@ -112,8 +101,7 @@ public class FragmentChecklist
         });
     }
 
-    private void create_a_test()
-    {
+    private void create_a_test() {
         LinkedList<ChecklistItem> list;
         ChecklistItem item;
         dsChecklist = new DSChecklist(getActivity());
@@ -185,8 +173,7 @@ public class FragmentChecklist
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener
-    {
+    public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(long id);
     }
