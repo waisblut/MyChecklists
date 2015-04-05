@@ -1,12 +1,22 @@
 package com.waisblut.mychecklists.a_view;
 
 import android.app.Activity;
-import android.app.ListFragment;
+import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.nhaarman.listviewanimations.ArrayAdapter;
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
+import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
+import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.OnItemMovedListener;
+import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.TouchViewDraggableManager;
 import com.waisblut.mychecklists.R;
 import com.waisblut.mychecklists.b_model.Checklist;
 import com.waisblut.mychecklists.b_model.ChecklistItem;
@@ -17,40 +27,76 @@ import java.util.LinkedList;
 
 
 public class FragmentChecklist
-        extends ListFragment {
+        extends Fragment {
     private Checklist mCheckList;
-    private DSChecklist dsChecklist;
-    private DSChecklistItem dsChecklistItem;
+    private DSChecklist mDsChecklist;
+    private DSChecklistItem mDsChecklistItem;
     private OnFragmentInteractionListener mListener;
-    private ListView mListView;
+    private DynamicListView mMyListView;
+    private int mNewItemCount;
 
     public FragmentChecklist() {
     }
 
-    // TODO: Rename and change types of parameters
-    public static FragmentChecklist newInstance(String param1, String param2) {
-        FragmentChecklist fragment = new FragmentChecklist();
-        //        Bundle args = new Bundle();
-        //        args.putString(ARG_PARAM1, param1);
-        //        args.putString(ARG_PARAM2, param2);
-        //        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_checklist, container);
+        mMyListView = (DynamicListView) rootView.findViewById(R.id.fragment_checklist_listview);
+        //        mMyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //            @Override
+        //            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //                if (null != mListener) {
+        //                    mListener.onClickListener(((Checklist) parent.getItemAtPosition(position)).getId());
+        //                }
+        //            }
+        //        });
+
+        //        mMyListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        //            @Override
+        //            public boolean onItemLongClick(final AdapterView<?> parent,
+        //                                           final View view,
+        //                                           final int position,
+        //                                           final long id) {
+        //                mListener.onLongClickListener(1, 3);
+        //                mMyListView.startDragging(position);
+        //                return true;
+        //            }
+        //        });
+
+
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        if (getArguments() != null) {
-            //            mParam1 = getArguments().getString(ARG_PARAM1);
-            //            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
         create_a_test();
 
-        AdapterChecklist adapter = new AdapterChecklist(getActivity(), R.layout.fragment_checklist);
-        setListAdapter(adapter);
-        adapter.addAll(dsChecklist.getAllChecklists());
+        MyListAdapter adapter = new MyListAdapter(getActivity());
 
+        setAdapter(adapter);
+        setDragAndDrop(adapter);
+
+
+    }
+
+    private void setAdapter(MyListAdapter adapter) {
+        AlphaInAnimationAdapter animationAdapter = new AlphaInAnimationAdapter(adapter);
+        animationAdapter.setAbsListView(mMyListView);
+        assert animationAdapter.getViewAnimator() != null;
+        animationAdapter.getViewAnimator()
+                        .setInitialDelayMillis(300);
+        mMyListView.setAdapter(animationAdapter);
+    }
+
+    private void setDragAndDrop(MyListAdapter adapter) {
+        mMyListView.enableDragAndDrop();
+        mMyListView.setDraggableManager(new TouchViewDraggableManager(R.id.list_row_draganddrop_touchview));
+        mMyListView.setOnItemMovedListener(new MyOnItemMovedListener(getActivity(), adapter));
+        mMyListView.setOnItemLongClickListener(new MyOnItemLongClickListener(mMyListView));
     }
 
     @Override
@@ -71,41 +117,11 @@ public class FragmentChecklist
         mListener = null;
     }
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-
-        if (null != mListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(dsChecklist.getAllChecklists()
-                                                       .get(position)
-                                                       .getId());
-        }
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent,
-                                           View view,
-                                           int position,
-                                           long id) {
-                Checklist chk = (Checklist) getListView().getItemAtPosition(position);
-
-                return true;
-            }
-        });
-    }
-
     private void create_a_test() {
         LinkedList<ChecklistItem> list;
         ChecklistItem item;
-        dsChecklist = new DSChecklist(getActivity());
-        dsChecklistItem = new DSChecklistItem(getActivity());
+        mDsChecklist = new DSChecklist(getActivity());
+        mDsChecklistItem = new DSChecklistItem(getActivity());
 
 
         list = new LinkedList<>();
@@ -119,9 +135,9 @@ public class FragmentChecklist
         list.add(item);
 
         mCheckList = new Checklist("Lista de Decolagem", list);
-        dsChecklist.open();
-        dsChecklist.create(mCheckList);
-        dsChecklistItem.open();
+        mDsChecklist.open();
+        mDsChecklist.create(mCheckList);
+        mDsChecklistItem.open();
 
         list = new LinkedList<>();
         item = new ChecklistItem("pegar mala");
@@ -132,7 +148,7 @@ public class FragmentChecklist
         list.add(item);
 
         mCheckList = new Checklist("Lista de Viagem", list);
-        dsChecklist.create(mCheckList);
+        mDsChecklist.create(mCheckList);
 
 
         list = new LinkedList<>();
@@ -146,7 +162,7 @@ public class FragmentChecklist
         list.add(item);
 
         mCheckList = new Checklist("Lista de Pescaria", list);
-        dsChecklist.create(mCheckList);
+        mDsChecklist.create(mCheckList);
 
 
         list = new LinkedList<>();
@@ -160,21 +176,122 @@ public class FragmentChecklist
         list.add(item);
 
         mCheckList = new Checklist("Lista de Futebol", list);
-        dsChecklist.create(mCheckList);
+        mDsChecklist.create(mCheckList);
+
+        list = new LinkedList<>();
+        mCheckList = new Checklist("Lista de Teste1", list);
+        mDsChecklist.create(mCheckList);
+
+        list = new LinkedList<>();
+        mCheckList = new Checklist("Lista de Teste1", list);
+        mDsChecklist.create(mCheckList);
+
+        list = new LinkedList<>();
+        mCheckList = new Checklist("Lista de Teste2", list);
+        mDsChecklist.create(mCheckList);
+
+        list = new LinkedList<>();
+        mCheckList = new Checklist("Lista de Teste3", list);
+        mDsChecklist.create(mCheckList);
+
+        list = new LinkedList<>();
+        mCheckList = new Checklist("Lista de Teste4", list);
+        mDsChecklist.create(mCheckList);
+
+        list = new LinkedList<>();
+        mCheckList = new Checklist("Lista de Teste5", list);
+        mDsChecklist.create(mCheckList);
+
+        list = new LinkedList<>();
+        mCheckList = new Checklist("Lista de Teste1", list);
+        mDsChecklist.create(mCheckList);
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(long id);
+        void onClickListener(long id);
+
+        void onLongClickListener(int oldPos, int newPos);
+    }
+
+    private static class MyListAdapter
+            extends ArrayAdapter<Checklist> {
+
+        private final Context mContext;
+
+        MyListAdapter(final Context context) {
+            mContext = context;
+            DSChecklist ds = new DSChecklist(context);
+            addAll(ds.getAllChecklists());
+            ds.close();
+        }
+
+        @Override
+        public long getItemId(final int position) {
+            return getItem(position).hashCode();
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public View getView(final int position, final View convertView, final ViewGroup parent) {
+            View view = convertView;
+            if (view == null) {
+                view = LayoutInflater.from(mContext)
+                                     .inflate(R.layout.list_row_checklist, parent, false);
+            }
+
+            ((TextView) view.findViewById(R.id.txtTitle)).setText(getItem(position).getName());
+            ((TextView) view.findViewById(R.id.txtSubTitle)).setText(
+                    "ID=" + getItem(position).getId());
+
+            return view;
+        }
+    }
+
+    private static class MyOnItemLongClickListener
+            implements AdapterView.OnItemLongClickListener {
+
+        private final DynamicListView mListView;
+
+        MyOnItemLongClickListener(final DynamicListView listView) {
+            mListView = listView;
+        }
+
+        @Override
+        public boolean onItemLongClick(final AdapterView<?> parent,
+                                       final View view,
+                                       final int position,
+                                       final long id) {
+            if (mListView != null) {
+                mListView.startDragging(position - mListView.getHeaderViewsCount());
+                Toast.makeText(view.getContext(), "Position=" + position, Toast.LENGTH_LONG)
+                     .show();
+            }
+            return true;
+        }
+    }
+
+    private class MyOnItemMovedListener
+            implements OnItemMovedListener {
+
+        private final ArrayAdapter<Checklist> mAdapter;
+        private final Context mContext;
+
+        MyOnItemMovedListener(Context context, final ArrayAdapter<Checklist> adapter) {
+            mAdapter = adapter;
+            mContext = context;
+
+        }
+
+        @Override
+        public void onItemMoved(final int originalPosition, final int newPosition) {
+            Toast.makeText(mContext,
+                           "initial=" + originalPosition + " | final=" + newPosition,
+                           Toast.LENGTH_LONG)
+                 .show();
+        }
     }
 }

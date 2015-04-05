@@ -1,7 +1,6 @@
 package com.waisblut.mychecklists.a_view;
 
 import android.app.Activity;
-import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,9 +16,6 @@ public class Main
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //ListFragment frgChecklists = new FragmentChecklist();
-        ListFragment frgChecklists = new FragmentChecklist();
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
@@ -52,10 +48,19 @@ public class Main
     }
 
     @Override
-    public void onFragmentInteraction(long id) {
-        TextView txtPosition = new TextView(this);
+    public void onClickListener(long id) {
+        TextView txtPosition;
         txtPosition = (TextView) findViewById(R.id.txtPosition);
         txtPosition.setText("Checklist ID = " + id);
+
+
+    }
+
+    @Override
+    public void onLongClickListener(int newId, int oldId) {
+        TextView txtPosition;
+        txtPosition = (TextView) findViewById(R.id.txtPosition);
+        txtPosition.setText("New = " + newId + "Old=" + oldId);
 
 
     }

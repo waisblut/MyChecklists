@@ -66,6 +66,7 @@ public class DSChecklist
     }
 
     public List<Checklist> getAllChecklists() {
+        this.open();
         List<Checklist> lstChecklist = new ArrayList<Checklist>();
 
         Cursor c = null;
