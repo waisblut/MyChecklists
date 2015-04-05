@@ -16,7 +16,6 @@ import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.OnItemMovedListener;
-import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.TouchViewDraggableManager;
 import com.waisblut.mychecklists.R;
 import com.waisblut.mychecklists.b_model.Checklist;
 import com.waisblut.mychecklists.b_model.ChecklistItem;
@@ -93,7 +92,7 @@ public class FragmentChecklist
 
     private void setDragAndDrop(MyListAdapter adapter) {
         mMyListView.enableDragAndDrop();
-        mMyListView.setDraggableManager(new TouchViewDraggableManager(R.id.list_row_draganddrop_touchview));
+        //mMyListView.setDraggableManager(new TouchViewDraggableManager(R.id.list_row_draganddrop_touchview));
         mMyListView.setOnItemMovedListener(new MyOnItemMovedListener(getActivity(), adapter));
         mMyListView.setOnItemLongClickListener(new MyOnItemLongClickListener(mMyListView));
     }
