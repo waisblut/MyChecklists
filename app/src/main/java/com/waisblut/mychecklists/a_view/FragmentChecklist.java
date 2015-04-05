@@ -31,7 +31,7 @@ public class FragmentChecklist
     private Checklist mCheckList;
     private DSChecklist mDsChecklist;
     private DSChecklistItem mDsChecklistItem;
-    private OnFragmentInteractionListener mListener;
+    public static onFragmentChecklistListener mListener;
     private DynamicListView mMyListView;
 
     public FragmentChecklist() {
@@ -47,7 +47,7 @@ public class FragmentChecklist
         //            @Override
         //            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         //                if (null != mListener) {
-        //                    mListener.onClickListener(((Checklist) parent.getItemAtPosition(position)).getId());
+        //                    mListener.onClickChecklist(((Checklist) parent.getItemAtPosition(position)).getId());
         //                }
         //            }
         //        });
@@ -58,7 +58,7 @@ public class FragmentChecklist
         //                                           final View view,
         //                                           final int position,
         //                                           final long id) {
-        //                mListener.onLongClickListener(1, 3);
+        //                mListener.onLongClickChecklist(1, 3);
         //                mMyListView.startDragging(position);
         //                return true;
         //            }
@@ -78,6 +78,8 @@ public class FragmentChecklist
 
         setAdapter(adapter);
         setDragAndDrop(adapter);
+
+        mMyListView.setOnItemClickListener(new MyOnItemClickListener(mMyListView));
     }
 
     private void setAdapter(MyListAdapter adapter) {
@@ -100,7 +102,7 @@ public class FragmentChecklist
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (onFragmentChecklistListener) activity;
         }
         catch (ClassCastException e) {
             throw new ClassCastException(
@@ -204,10 +206,10 @@ public class FragmentChecklist
         mDsChecklist.create(mCheckList);
     }
 
-    public interface OnFragmentInteractionListener {
-        void onClickListener(long id);
+    public interface onFragmentChecklistListener {
+        void onClickChecklist(Checklist checklist);
 
-        void onLongClickListener(int oldPos, int newPos);
+        void onLongClickChecklist(int oldPos, int newPos);
     }
 
     private static class MyListAdapter
@@ -247,6 +249,23 @@ public class FragmentChecklist
                     "ID=" + item.getId() + " | Order = " + item.getOrder());
 
             return view;
+        }
+    }
+
+    private static class MyOnItemClickListener
+            implements AdapterView.OnItemClickListener {
+        private final DynamicListView mListView;
+
+        MyOnItemClickListener(final DynamicListView listView) {
+            mListView = listView;
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if (mListView != null) {
+                mListener.onClickChecklist((Checklist) mListView.getItemAtPosition(position));
+            }
+
         }
     }
 

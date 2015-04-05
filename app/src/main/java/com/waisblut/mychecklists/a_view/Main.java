@@ -7,10 +7,11 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.waisblut.mychecklists.R;
+import com.waisblut.mychecklists.b_model.Checklist;
 
 public class Main
         extends Activity
-        implements FragmentChecklist.OnFragmentInteractionListener {
+        implements FragmentChecklist.onFragmentChecklistListener,FragmentChecklistItem.OnFragmentChecklistItemListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,16 +44,30 @@ public class Main
     }
 
     @Override
-    public void onClickListener(long id) {
+    public void onClickChecklist(Checklist checklist) {
         TextView txtPosition;
         txtPosition = (TextView) findViewById(R.id.txtPosition);
-        txtPosition.setText("Checklist ID = " + id);
+        txtPosition.setText("Checklist ID = " + checklist.getId());
+
+        getFragmentManager().beginTransaction()
+                            .replace(R.id.mainContainer, new FragmentChecklistItem())
+                            .commit();
     }
 
     @Override
-    public void onLongClickListener(int newId, int oldId) {
+    public void onLongClickChecklist(int newId, int oldId) {
         TextView txtPosition;
         txtPosition = (TextView) findViewById(R.id.txtPosition);
         txtPosition.setText("New = " + newId + "Old=" + oldId);
+    }
+
+    @Override
+    public void onClickChecklistItem(Checklist checklist) {
+
+    }
+
+    @Override
+    public void onLongClickChecklistItem(int newId, int oldId) {
+
     }
 }
