@@ -99,6 +99,16 @@ public class DSChecklist
         return lstChecklist;
     }
 
+    public void updateOrder(Checklist c, int newPosition) {
+        ContentValues values = new ContentValues();
+        values.put(ORDER,
+                   newPosition); //These Fields should be your String values of actual column names
+        database.update(TABLE_NAME, values, ID + "=" + c.getId(), null);
+        c.setOrder(newPosition);
+
+
+    }
+
     private Checklist createCheckList(Cursor c) {
         Checklist chkList = new Checklist();
         DSChecklistItem dsItem;

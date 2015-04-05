@@ -23,6 +23,7 @@ import com.waisblut.mychecklists.c_data.DSChecklist;
 import com.waisblut.mychecklists.c_data.DSChecklistItem;
 
 import java.util.LinkedList;
+import java.util.List;
 
 
 public class FragmentChecklist
@@ -181,7 +182,7 @@ public class FragmentChecklist
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste1", list, 5);
+        mCheckList = new Checklist("Lista de Teste1.1", list, 5);
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
@@ -288,10 +289,17 @@ public class FragmentChecklist
 
         @Override
         public void onItemMoved(final int originalPosition, final int newPosition) {
-            Toast.makeText(mContext,
-                           "initial=" + originalPosition + " | final=" + newPosition,
-                           Toast.LENGTH_LONG)
-                 .show();
+            DSChecklist ds = new DSChecklist(mContext);
+            ds.open();
+
+            List<Checklist> list = mAdapter.getItems();
+            for (Checklist c : list) {
+                ds.updateOrder(c, list.indexOf(c));
+            }
+
+            ds.close();
+
+            mAdapter.notifyDataSetChanged();
         }
     }
 }
