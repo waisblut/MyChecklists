@@ -28,7 +28,5 @@
         android:layout_height="15dp"
         android:layout_alignParentBottom="true"
         android:background="@android:color/black">
-
-
     </LinearLayout>
 </RelativeLayout>

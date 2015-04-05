@@ -33,7 +33,6 @@ public class FragmentChecklist
     private DSChecklistItem mDsChecklistItem;
     private OnFragmentInteractionListener mListener;
     private DynamicListView mMyListView;
-    private int mNewItemCount;
 
     public FragmentChecklist() {
     }
@@ -134,7 +133,7 @@ public class FragmentChecklist
         item = new ChecklistItem("Decolar");
         list.add(item);
 
-        mCheckList = new Checklist("Lista de Decolagem", list);
+        mCheckList = new Checklist("Lista de Decolagem", list, 0);
         mDsChecklist.open();
         mDsChecklist.create(mCheckList);
         mDsChecklistItem.open();
@@ -147,7 +146,7 @@ public class FragmentChecklist
         item = new ChecklistItem("fechar mala");
         list.add(item);
 
-        mCheckList = new Checklist("Lista de Viagem", list);
+        mCheckList = new Checklist("Lista de Viagem", list, 3);
         mDsChecklist.create(mCheckList);
 
 
@@ -161,7 +160,7 @@ public class FragmentChecklist
         item = new ChecklistItem("pescar");
         list.add(item);
 
-        mCheckList = new Checklist("Lista de Pescaria", list);
+        mCheckList = new Checklist("Lista de Pescaria", list, 2);
         mDsChecklist.create(mCheckList);
 
 
@@ -175,35 +174,35 @@ public class FragmentChecklist
         item = new ChecklistItem("jogar");
         list.add(item);
 
-        mCheckList = new Checklist("Lista de Futebol", list);
+        mCheckList = new Checklist("Lista de Futebol", list, 1);
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste1", list);
+        mCheckList = new Checklist("Lista de Teste1", list, 4);
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste1", list);
+        mCheckList = new Checklist("Lista de Teste1", list, 5);
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste2", list);
+        mCheckList = new Checklist("Lista de Teste2", list, 6);
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste3", list);
+        mCheckList = new Checklist("Lista de Teste3", list, 7);
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste4", list);
+        mCheckList = new Checklist("Lista de Teste4", list, 8);
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste5", list);
+        mCheckList = new Checklist("Lista de Teste5", list, 9);
         mDsChecklist.create(mCheckList);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste1", list);
+        mCheckList = new Checklist("Lista de Teste1", list, 10);
         mDsChecklist.create(mCheckList);
     }
 
@@ -243,9 +242,11 @@ public class FragmentChecklist
                                      .inflate(R.layout.list_row_checklist, parent, false);
             }
 
-            ((TextView) view.findViewById(R.id.txtTitle)).setText(getItem(position).getName());
+            Checklist item = getItem(position);
+
+            ((TextView) view.findViewById(R.id.txtTitle)).setText(item.getName());
             ((TextView) view.findViewById(R.id.txtSubTitle)).setText(
-                    "ID=" + getItem(position).getId());
+                    "ID=" + item.getId() + " | Order = " + item.getOrder());
 
             return view;
         }
