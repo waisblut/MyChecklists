@@ -78,8 +78,6 @@ public class FragmentChecklist
 
         setAdapter(adapter);
         setDragAndDrop(adapter);
-
-
     }
 
     private void setAdapter(MyListAdapter adapter) {
