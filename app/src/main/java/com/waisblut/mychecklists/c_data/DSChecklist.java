@@ -17,6 +17,7 @@ public class DSChecklist
     public static final String TABLE_NAME = "Checklist";
     //region table fields
     public static final String ID = "_id";
+    public static final String ORDER = "order_in_list";
     public static final String NAME = "list_name";
     //endregion
 
@@ -42,6 +43,7 @@ public class DSChecklist
         //region columns
         super.setColumn(ID, EnumDataTypes.INTEGER, "PRIMARY KEY AUTOINCREMENT");
         super.setColumn(NAME, EnumDataTypes.TEXT, "NOT NULL UNIQUE");
+        super.setColumn(ORDER, EnumDataTypes.INTEGER, "NOT NULL");
         //endregion
     }
 
@@ -50,6 +52,7 @@ public class DSChecklist
         ContentValues values = new ContentValues();
 
         values.put(NAME, chkList.getName());
+        values.put(ORDER, chkList.getOrder());
 
         try {
             insertId = database.insertOrThrow(tableName, null, values);
@@ -78,7 +81,7 @@ public class DSChecklist
                                null,
                                null,
                                null,
-                               null);
+                               ORDER);
             Logger.log('i', this.tableName + " Returned " + c.getCount() + " rows");
         }
         catch (Exception ex) {
@@ -104,8 +107,10 @@ public class DSChecklist
             dsItem = new DSChecklistItem(super.context);
             dsItem.open();
 
-            chkList = new Checklist(c.getLong(c.getColumnIndex(ID)), c.getString(c.getColumnIndex(
-                    NAME)), dsItem.getListItem(c.getLong(c.getColumnIndex(ID))));
+            chkList = new Checklist(c.getLong(c.getColumnIndex(ID)),
+                                    c.getString(c.getColumnIndex(NAME)),
+                                    dsItem.getListItem(c.getLong(c.getColumnIndex(ID))),
+                                    c.getInt(c.getColumnIndex(ORDER)));
         }
 
         return chkList;

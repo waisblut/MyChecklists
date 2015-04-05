@@ -5,21 +5,24 @@ import java.util.LinkedList;
 public class Checklist {
     private long id;
     private String name;
+    private int order;
     private LinkedList<ChecklistItem> list;//TODO select the best type of Collection
 
     public Checklist() {
 
     }
 
-    public Checklist(long id, String name, LinkedList<ChecklistItem> items) {
+    public Checklist(long id, String name, LinkedList<ChecklistItem> items, int order) {
         this.id = id;
         this.name = name;
         this.list = items;
+        this.order = order;
     }
 
-    public Checklist(String name, LinkedList<ChecklistItem> list) {
+    public Checklist(String name, LinkedList<ChecklistItem> list, int order) {
         this.setName(name);
         this.list = list;
+        this.order = order;
     }
 
     public void addItem(ChecklistItem item) {
@@ -55,5 +58,13 @@ public class Checklist {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }
