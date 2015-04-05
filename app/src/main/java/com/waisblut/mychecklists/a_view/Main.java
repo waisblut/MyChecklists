@@ -11,7 +11,8 @@ import com.waisblut.mychecklists.b_model.Checklist;
 
 public class Main
         extends Activity
-        implements FragmentChecklist.onFragmentChecklistListener,FragmentChecklistItem.OnFragmentChecklistItemListener {
+        implements FragmentChecklist.onFragmentChecklistListener,
+                   FragmentChecklistItem.OnFragmentChecklistItemListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +53,6 @@ public class Main
         getFragmentManager().beginTransaction()
                             .replace(R.id.mainContainer, new FragmentChecklistItem())
                             .commit();
-    }
-
-    @Override
-    public void onLongClickChecklist(int newId, int oldId) {
-        TextView txtPosition;
-        txtPosition = (TextView) findViewById(R.id.txtPosition);
-        txtPosition.setText("New = " + newId + "Old=" + oldId);
     }
 
     @Override

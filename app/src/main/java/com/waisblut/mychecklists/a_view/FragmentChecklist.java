@@ -28,9 +28,6 @@ import java.util.List;
 
 public class FragmentChecklist
         extends Fragment {
-    private Checklist mCheckList;
-    private DSChecklist mDsChecklist;
-    private DSChecklistItem mDsChecklistItem;
     public static onFragmentChecklistListener mListener;
     private DynamicListView mMyListView;
 
@@ -43,27 +40,6 @@ public class FragmentChecklist
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_checklist, container);
         mMyListView = (DynamicListView) rootView.findViewById(R.id.fragment_checklist_listview);
-        //        mMyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-        //            @Override
-        //            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //                if (null != mListener) {
-        //                    mListener.onClickChecklist(((Checklist) parent.getItemAtPosition(position)).getId());
-        //                }
-        //            }
-        //        });
-
-        //        mMyListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-        //            @Override
-        //            public boolean onItemLongClick(final AdapterView<?> parent,
-        //                                           final View view,
-        //                                           final int position,
-        //                                           final long id) {
-        //                mListener.onLongClickChecklist(1, 3);
-        //                mMyListView.startDragging(position);
-        //                return true;
-        //            }
-        //        });
-
 
         return super.onCreateView(inflater, container, savedInstanceState);
     }
@@ -119,8 +95,8 @@ public class FragmentChecklist
     private void create_a_test() {
         LinkedList<ChecklistItem> list;
         ChecklistItem item;
-        mDsChecklist = new DSChecklist(getActivity());
-        mDsChecklistItem = new DSChecklistItem(getActivity());
+        DSChecklist dsChecklist = new DSChecklist(getActivity());
+        DSChecklistItem dsChecklistItem = new DSChecklistItem(getActivity());
 
 
         list = new LinkedList<>();
@@ -133,10 +109,10 @@ public class FragmentChecklist
         item = new ChecklistItem("Decolar");
         list.add(item);
 
-        mCheckList = new Checklist("Lista de Decolagem", list, 0);
-        mDsChecklist.open();
-        mDsChecklist.create(mCheckList);
-        mDsChecklistItem.open();
+        Checklist checklist = new Checklist("Lista de Decolagem", list, 0);
+        dsChecklist.open();
+        dsChecklist.create(checklist);
+        dsChecklistItem.open();
 
         list = new LinkedList<>();
         item = new ChecklistItem("pegar mala");
@@ -146,8 +122,8 @@ public class FragmentChecklist
         item = new ChecklistItem("fechar mala");
         list.add(item);
 
-        mCheckList = new Checklist("Lista de Viagem", list, 3);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Viagem", list, 3);
+        dsChecklist.create(checklist);
 
 
         list = new LinkedList<>();
@@ -160,8 +136,8 @@ public class FragmentChecklist
         item = new ChecklistItem("pescar");
         list.add(item);
 
-        mCheckList = new Checklist("Lista de Pescaria", list, 2);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Pescaria", list, 2);
+        dsChecklist.create(checklist);
 
 
         list = new LinkedList<>();
@@ -174,42 +150,40 @@ public class FragmentChecklist
         item = new ChecklistItem("jogar");
         list.add(item);
 
-        mCheckList = new Checklist("Lista de Futebol", list, 1);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Futebol", list, 1);
+        dsChecklist.create(checklist);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste1", list, 4);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Teste1", list, 4);
+        dsChecklist.create(checklist);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste1.1", list, 5);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Teste1.1", list, 5);
+        dsChecklist.create(checklist);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste2", list, 6);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Teste2", list, 6);
+        dsChecklist.create(checklist);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste3", list, 7);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Teste3", list, 7);
+        dsChecklist.create(checklist);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste4", list, 8);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Teste4", list, 8);
+        dsChecklist.create(checklist);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste5", list, 9);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Teste5", list, 9);
+        dsChecklist.create(checklist);
 
         list = new LinkedList<>();
-        mCheckList = new Checklist("Lista de Teste1", list, 10);
-        mDsChecklist.create(mCheckList);
+        checklist = new Checklist("Lista de Teste1", list, 10);
+        dsChecklist.create(checklist);
     }
 
     public interface onFragmentChecklistListener {
         void onClickChecklist(Checklist checklist);
-
-        void onLongClickChecklist(int oldPos, int newPos);
     }
 
     private static class MyListAdapter
