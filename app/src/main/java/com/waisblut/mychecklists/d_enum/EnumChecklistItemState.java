@@ -5,7 +5,8 @@ public enum EnumChecklistItemState {
     OK(1),
     REDO(2),
     SKIP(3),
-    NOT_OK(4);
+    NOT_OK(4),
+    PAUSE(5);
 
     protected int code;
 

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 
 import com.waisblut.mychecklists.b_model.Checklist;
+import com.waisblut.mychecklists.b_model.ChecklistItem;
 import com.waisblut.mychecklists.d_enum.EnumDataTypes;
 import com.waisblut.mychecklists.e_util.Logger;
 
@@ -47,30 +48,35 @@ public class DSChecklist
         //endregion
     }
 
-    public Checklist create(Checklist chkList) {
+    public Checklist create(Checklist checklist) {
         long insertId;
         ContentValues values = new ContentValues();
 
-        values.put(NAME, chkList.getName());
-        values.put(ORDER, chkList.getOrder());
+        values.put(NAME, checklist.getName());
+        values.put(ORDER, checklist.getOrder());
 
         try {
-            insertId = database.insertOrThrow(tableName, null, values);
+            open();
+            checklist.setId(database.insertOrThrow(tableName, null, values));
 
-            Logger.log('i', tableName + " being created \n with ID=" + insertId);
+            DSChecklistItem dsItem = new DSChecklistItem(super.context);
 
-            chkList.setId(insertId);
+            for (ChecklistItem c : checklist.getItemList()) {
+                dsItem.create(c, checklist);
+            }
+
+            Logger.log('i', tableName + " being created \n with ID=" + checklist.getId());
         }
         catch (SQLException ex) {
-            Logger.log('i', tableName + " ERROR - " + ex.getMessage());
+            Logger.log('e', tableName + " ERROR - " + ex.getMessage());
         }
 
-        return chkList;
+        return checklist;
     }
 
     public List<Checklist> getAllChecklists() {
         this.open();
-        List<Checklist> lstChecklist = new ArrayList<Checklist>();
+        List<Checklist> lstChecklist = new ArrayList<>();
 
         Cursor c = null;
 
@@ -99,14 +105,20 @@ public class DSChecklist
         return lstChecklist;
     }
 
-    public void updateOrder(Checklist c, int newPosition) {
+    public void updateOrder(List<Checklist> list) {
+        open();
+
+        for (Checklist c : list) {
+            this.updateOrder(c, list.indexOf(c));
+        }
+    }
+
+    private void updateOrder(Checklist c, int newPosition) {
         ContentValues values = new ContentValues();
-        values.put(ORDER,
-                   newPosition); //These Fields should be your String values of actual column names
+
+        values.put(ORDER, newPosition);
         database.update(TABLE_NAME, values, ID + "=" + c.getId(), null);
         c.setOrder(newPosition);
-
-
     }
 
     private Checklist createCheckList(Cursor c) {

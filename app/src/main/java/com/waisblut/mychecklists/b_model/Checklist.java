@@ -1,12 +1,14 @@
 package com.waisblut.mychecklists.b_model;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class Checklist {
+public class Checklist
+        implements Serializable {
     private long id;
     private String name;
     private int order;
-    private LinkedList<ChecklistItem> list;//TODO select the best type of Collection
+    private LinkedList<ChecklistItem> itemList;//TODO select the best type of Collection
 
     public Checklist() {
 
@@ -15,32 +17,34 @@ public class Checklist {
     public Checklist(long id, String name, LinkedList<ChecklistItem> items, int order) {
         this.id = id;
         this.name = name;
-        this.list = items;
+        this.setItemList(items);
         this.order = order;
     }
 
     public Checklist(String name, LinkedList<ChecklistItem> list, int order) {
         this.setName(name);
-        this.list = list;
+        this.setItemList(list);
         this.order = order;
     }
 
     public void addItem(ChecklistItem item) {
-        this.list.add(item);
+        this.getItemList()
+            .add(item);
 
     }
 
     public void addItemAt(ChecklistItem item, int pos) {
-        this.list.add(pos, item);
+        this.getItemList()
+            .add(pos, item);
 
     }
 
     public void removeItem(ChecklistItem item) {
-        list.remove(item);
+        getItemList().remove(item);
     }
 
     public void removeItemAt(int pos) {
-        list.remove(pos);
+        getItemList().remove(pos);
     }
 
 
@@ -66,5 +70,13 @@ public class Checklist {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public LinkedList<ChecklistItem> getItemList() {
+        return itemList;
+    }
+
+    public void setItemList(LinkedList<ChecklistItem> itemList) {
+        this.itemList = itemList;
     }
 }

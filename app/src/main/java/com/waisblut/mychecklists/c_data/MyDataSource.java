@@ -151,7 +151,7 @@ public class MyDataSource {
 
             tag.append("-----------------\n\n\n");
 
-            Logger.log('i', tag.toString());
+            Logger.log('d', tag.toString());
 
             c.close();
         }

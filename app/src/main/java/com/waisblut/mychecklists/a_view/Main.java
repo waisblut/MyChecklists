@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.waisblut.mychecklists.R;
 import com.waisblut.mychecklists.b_model.Checklist;
+import com.waisblut.mychecklists.b_model.ChecklistItem;
 
 public class Main
         extends Activity
@@ -21,7 +22,7 @@ public class Main
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                                .replace(R.id.mainContainer, new FragmentChecklist())
+                                .add(R.id.mainContainer, new FragmentChecklist())
                                 .commit();
         }
     }
@@ -37,11 +38,8 @@ public class Main
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
 
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -51,13 +49,18 @@ public class Main
         txtPosition.setText("Checklist ID = " + checklist.getId());
 
         getFragmentManager().beginTransaction()
-                            .replace(R.id.mainContainer, new FragmentChecklistItem())
+                            .replace(R.id.mainContainer,
+                                     FragmentChecklistItem.newInstance(checklist))
+                            .addToBackStack(null)
                             .commit();
+
     }
 
     @Override
-    public void onClickChecklistItem(Checklist checklist) {
-
+    public void onClickChecklistItem(ChecklistItem checklistItem) {
+        TextView txtPosition;
+        txtPosition = (TextView) findViewById(R.id.txtPosition);
+        txtPosition.setText("ChecklistITEM ID = " + checklistItem.getId());
     }
 
     @Override
