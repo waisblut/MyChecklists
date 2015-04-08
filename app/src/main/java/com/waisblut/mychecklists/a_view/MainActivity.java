@@ -97,7 +97,7 @@ public class MainActivity
         mMyListView.setOnItemLongClickListener(new MyOnItemLongClickListener(mMyListView));
     }
 
-    private static class MyListAdapter
+    private class MyListAdapter
             extends ArrayAdapter<Checklist> {
 
         private final Context mContext;
@@ -155,7 +155,7 @@ public class MainActivity
         }
     }
 
-    private static class MyOnItemLongClickListener
+    private class MyOnItemLongClickListener
             implements AdapterView.OnItemLongClickListener {
 
         private final DynamicListView mListView;

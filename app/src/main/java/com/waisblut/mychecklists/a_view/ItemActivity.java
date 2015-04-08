@@ -2,9 +2,12 @@ package com.waisblut.mychecklists.a_view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +18,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
@@ -27,6 +29,7 @@ import com.waisblut.mychecklists.b_model.ChecklistItem;
 import com.waisblut.mychecklists.c_data.DSChecklistItem;
 import com.waisblut.mychecklists.e_util.Logger;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class ItemActivity
@@ -40,6 +43,7 @@ public class ItemActivity
     private static DSChecklistItem mDsChecklistItem;
     private static AudioManager mAudioManager;
     private static int mOldVolume;
+    private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
 
     @Override
@@ -51,6 +55,22 @@ public class ItemActivity
             mMyListView = (DynamicListView) findViewById(R.id.fragment_checklist_listview);
             btnNext = (Button) findViewById(R.id.btnNext);
             mTts = new TextToSpeech(this, this);
+            mTts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                @Override
+                public void onStart(String utteranceId) {
+                    setUpVoiceRecon();
+                }
+
+                @Override
+                public void onDone(String utteranceId) {
+                    setUpVoiceRecon();
+                }
+
+                @Override
+                public void onError(String utteranceId) {
+
+                }
+            });
             mCounter = 0;
         }
     }
@@ -101,18 +121,30 @@ public class ItemActivity
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
     }
 
-    protected static void speakOut(String text) {
+    protected static void speakOut(final String text) {
         mTts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-        //mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mOldVolume, 0);
     }
 
+    public void setUpVoiceRecon() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt_BR");//TODO tirar HARDCODED
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Portugês - BR");//TODO tirar HARDCODED
+        do {
+            boolean b = mTts.isSpeaking();
+        } while (mTts.isSpeaking());
+        startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         Bundle b = getIntent().getExtras();
 
-        mChecklist = (Checklist) b.getSerializable("EXTRA");
+        mChecklist = (Checklist) b.getSerializable("EXTRA");//TODO tirar HARDCODED
 
         final MyListAdapter adapter = new MyListAdapter(this, mChecklist);
 
@@ -138,6 +170,17 @@ public class ItemActivity
         Logger.log('e', String.valueOf(mMyListView.getCheckedItemCount()));
 
         mMyListView.setOnItemClickListener(new MyOnItemClickListener(mMyListView, adapter));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
+            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            for (String s : matches) {
+                Logger.log('e', s);
+            }
+        }
     }
 
     @Override
@@ -170,11 +213,10 @@ public class ItemActivity
         mMyListView.setOnItemLongClickListener(new MyOnItemLongClickListener(mMyListView));
     }
 
-    private static class MyListAdapter
+    private class MyListAdapter
             extends ArrayAdapter<ChecklistItem> {
 
         private final Context mContext;
-        //private int selectedPos = 0;
 
         MyListAdapter(final Context context, Checklist checklist) {
             mContext = context;
@@ -187,6 +229,7 @@ public class ItemActivity
             mCounter = pos;
             notifyDataSetChanged();
             speakOut(getItem(pos).getName());
+            setUpVoiceRecon();
         }
 
         @Override
@@ -245,7 +288,7 @@ public class ItemActivity
         }
     }
 
-    private static class MyOnItemClickListener
+    private class MyOnItemClickListener
             implements AdapterView.OnItemClickListener {
         private final DynamicListView mListView;
 
@@ -264,7 +307,7 @@ public class ItemActivity
         }
     }
 
-    private static class MyOnItemLongClickListener
+    private class MyOnItemLongClickListener
             implements AdapterView.OnItemLongClickListener {
 
         private final DynamicListView mListView;
@@ -280,8 +323,6 @@ public class ItemActivity
                                        final long id) {
             if (mListView != null) {
                 mListView.startDragging(position - mListView.getHeaderViewsCount());
-                Toast.makeText(view.getContext(), "Position=" + position, Toast.LENGTH_LONG)
-                     .show();
             }
             return true;
         }

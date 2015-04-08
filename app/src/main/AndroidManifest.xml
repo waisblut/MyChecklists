@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.waisblut.mychecklists"
+<manifest
+    package="com.waisblut.mychecklists"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -22,8 +24,7 @@
             android:name=".a_view.ItemActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Light.NoTitleBar">
-        </activity>
+            android:theme="@android:style/Theme.Light.NoTitleBar" />
     </application>
 
 </manifest>
