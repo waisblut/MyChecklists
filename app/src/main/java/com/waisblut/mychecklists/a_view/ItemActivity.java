@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.view.LayoutInflater;
@@ -27,9 +29,11 @@ import com.waisblut.mychecklists.R;
 import com.waisblut.mychecklists.b_model.Checklist;
 import com.waisblut.mychecklists.b_model.ChecklistItem;
 import com.waisblut.mychecklists.c_data.DSChecklistItem;
+import com.waisblut.mychecklists.d_enum.EnumChecklistItemState;
 import com.waisblut.mychecklists.e_util.Logger;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class ItemActivity
@@ -43,7 +47,10 @@ public class ItemActivity
     private static DSChecklistItem mDsChecklistItem;
     private static AudioManager mAudioManager;
     private static int mOldVolume;
+    private static boolean mHasSpokenTitle = false;
     private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
+    private SpeechRecognizer mSpeechRecognizer;
+    private Intent mSpeechRecognizerIntent;
 
 
     @Override
@@ -54,25 +61,11 @@ public class ItemActivity
         if (savedInstanceState == null) {
             mMyListView = (DynamicListView) findViewById(R.id.fragment_checklist_listview);
             btnNext = (Button) findViewById(R.id.btnNext);
-            mTts = new TextToSpeech(this, this);
-            mTts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                @Override
-                public void onStart(String utteranceId) {
-                    setUpVoiceRecon();
-                }
-
-                @Override
-                public void onDone(String utteranceId) {
-                    setUpVoiceRecon();
-                }
-
-                @Override
-                public void onError(String utteranceId) {
-
-                }
-            });
+            mHasSpokenTitle = false;
             mCounter = 0;
         }
+
+        mTts = new TextToSpeech(this, this);
     }
 
     @Override
@@ -84,6 +77,11 @@ public class ItemActivity
         if (mTts != null) {
             mTts.stop();
             mTts.shutdown();
+        }
+
+        if (mSpeechRecognizer != null) {
+            mSpeechRecognizer.stopListening();
+            mSpeechRecognizer.destroy();
         }
         super.onDestroy();
     }
@@ -102,7 +100,8 @@ public class ItemActivity
                 Logger.log('e', "This Language is not supported");
             }
             else {
-                if (mChecklist != null) {
+                if (mChecklist != null && !mHasSpokenTitle) {
+                    mHasSpokenTitle = true;
                     speakOut(mChecklist.getName());
                 }
             }
@@ -121,20 +120,27 @@ public class ItemActivity
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
     }
 
-    protected static void speakOut(final String text) {
+    @SuppressWarnings("deprecation")
+    protected void speakOut(final String text) {
         mTts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
     }
 
     public void setUpVoiceRecon() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt_BR");//TODO tirar HARDCODED
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Portugês - BR");//TODO tirar HARDCODED
+        mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                         RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
+                                         "pt_BR");//TODO tirar HARDCODED
+        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                                         "Portugês - BR");//TODO tirar HARDCODED
         do {
-            boolean b = mTts.isSpeaking();
+            mTts.isSpeaking();
         } while (mTts.isSpeaking());
-        startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+        //startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+        SpeechRecognitionListener listener = new SpeechRecognitionListener();
+        mSpeechRecognizer.setRecognitionListener(listener);
+        mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
 
     }
 
@@ -164,6 +170,24 @@ public class ItemActivity
             }
         });
 
+
+        mTts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+                //setUpVoiceRecon();
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                //setUpVoiceRecon();
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+
+            }
+        });
+
         setAdapter(adapter);
         setDragAndDrop(adapter);
         mMyListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
@@ -175,12 +199,74 @@ public class ItemActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
-            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            for (String s : matches) {
-                Logger.log('e', s);
-            }
-        }
+        //if (requestCode == VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
+        //            List<String> strOk = new ArrayList<>();
+        //            strOk.add("ok");
+        //            strOk.add("oque");
+        //            strOk.add("oc");
+        //            strOk.add("rock");
+        //
+        //            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+        //            Logger.log('w', "ANTES: " + matches.size());
+        //            for (String s : matches) {
+        //                Logger.log('e', "ORIGINAL: " + s);
+        //            }
+        //
+        //            matches.retainAll(strOk);
+        //            Logger.log('w', "DEPOIS: " + matches.size());
+        //
+
+        //}
+    }
+
+    private EnumChecklistItemState validateVoice(ArrayList<String> voice) {
+        //***OK - continua
+        List<String> strOk = new ArrayList<>();
+        strOk.add("ok");
+        strOk.add("oque");
+        strOk.add("oc");
+        strOk.add("rock");
+
+        //***PARAR - cancela a execucao da leitura da lista
+        List<String> strParar = new ArrayList<>();
+        strParar.add("parar");
+        strParar.add("paraná");
+        strParar.add("para");
+        strParar.add("pára");
+        strParar.add("não");
+        strParar.add("nao");
+
+        //***SKIP - pula o item, mas volta nele depois
+        List<String> strPular = new ArrayList<>();
+        strPular.add("poa");
+        strPular.add("boa");
+        strPular.add("porra");
+        strPular.add("poá");
+        strPular.add("rua");
+        strPular.add("pua");
+        strPular.add("pular");
+
+        //***PAUSE - PAUSA a execucao da leitura da lista
+        List<String> strPause = new ArrayList<>();
+        strPause.add("esperar");
+        strPause.add("espera");
+
+        //VOLTAR - Volta para o item anterior (Nao seta este item e Des-Checka o anterior
+        List<String> strBack = new ArrayList<>();
+        strBack.add("voltar");
+        strBack.add("vou lá");
+        strBack.add("vou dar");
+        strBack.add("volta");
+        strBack.add("olá");
+
+
+        //Se nao reconhecer nenhum dos comandos....abrir DIALOG com os botoes PROX(OK), ANT, PAUSE, STOP SKIP
+
+
+        EnumChecklistItemState ret;
+        ret = EnumChecklistItemState.OK;
+
+        return ret;
     }
 
     @Override
@@ -302,6 +388,9 @@ public class ItemActivity
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (this.mListView != null) {
+                if (mSpeechRecognizer != null) {
+                    mSpeechRecognizer.cancel();
+                }
                 adapter.setSelectedPosition(position);
             }
         }
@@ -350,6 +439,71 @@ public class ItemActivity
             mAdapter.setSelectedPosition(mCounter = 0);
 
             mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private class SpeechRecognitionListener
+            implements RecognitionListener {
+
+        @Override
+        public void onBeginningOfSpeech() {
+
+        }
+
+        @Override
+        public void onBufferReceived(byte[] buffer) {
+
+        }
+
+        @Override
+        public void onEndOfSpeech() {
+            Logger.log('w', "onEndOfSpeech");
+        }
+
+        @Override
+        public void onError(int error) {
+            //mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+            // TODO talvez eliminar essa linha e criar dialog
+            Logger.log('w', "OnError");
+            //TODO  Prepare a DIALOG
+        }
+
+        @Override
+        public void onEvent(int eventType, Bundle params) {
+
+        }
+
+        @Override
+        public void onPartialResults(Bundle partialResults) {
+
+        }
+
+        @Override
+        public void onReadyForSpeech(Bundle params) {
+
+        }
+
+        @Override
+        public void onResults(Bundle results) {
+            //Log.d(TAG, "onResults"); //$NON-NLS-1$
+            ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            List<String> strOk = new ArrayList<>();
+            strOk.add("ok");
+            strOk.add("oque");
+            strOk.add("oc");
+            strOk.add("rock");
+
+            Logger.log('w', "ANTES: " + matches.size());
+            for (String s : matches) {
+                Logger.log('e', "ORIGINAL: " + s);
+            }
+
+            matches.retainAll(strOk);
+            Logger.log('w', "DEPOIS: " + matches.size());
+        }
+
+        @Override
+        public void onRmsChanged(float rmsdB) {
         }
     }
 }
