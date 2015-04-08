@@ -38,6 +38,8 @@ public class ItemActivity
     private static int mCounter = 0;
     private static TextToSpeech mTts;
     private static DSChecklistItem mDsChecklistItem;
+    private static AudioManager mAudioManager;
+    private static int mOldVolume;
 
 
     @Override
@@ -55,6 +57,10 @@ public class ItemActivity
 
     @Override
     public void onDestroy() {
+        if (mAudioManager != null) {
+            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mOldVolume, 0);
+        }
+
         if (mTts != null) {
             mTts.stop();
             mTts.shutdown();
@@ -69,9 +75,7 @@ public class ItemActivity
 
             int result = mTts.setLanguage(new Locale("pt", "BR"));
 
-            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+            setUpMaxVolume();
 
             if (result == TextToSpeech.LANG_MISSING_DATA ||
                 result == TextToSpeech.LANG_NOT_SUPPORTED) {
@@ -90,9 +94,16 @@ public class ItemActivity
 
     }
 
-    protected static void speakOut(String text) {
+    private void setUpMaxVolume() {
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mOldVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        int amStreamMusicMaxVol = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+    }
 
+    protected static void speakOut(String text) {
         mTts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        //mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mOldVolume, 0);
     }
 
 
