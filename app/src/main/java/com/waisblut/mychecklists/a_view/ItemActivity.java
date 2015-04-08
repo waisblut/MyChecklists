@@ -1,14 +1,18 @@
 package com.waisblut.mychecklists.a_view;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,49 +27,120 @@ import com.waisblut.mychecklists.b_model.ChecklistItem;
 import com.waisblut.mychecklists.c_data.DSChecklistItem;
 import com.waisblut.mychecklists.e_util.Logger;
 
-public class FragmentChecklistItem
-        extends Fragment {
-    private static final String CHECKLIST_KEY = "checklist";
+import java.util.Locale;
 
-    private Checklist mChecklist;
-    public static OnFragmentChecklistItemListener mListener;
+public class ItemActivity
+        extends Activity
+        implements TextToSpeech.OnInitListener {
     private DynamicListView mMyListView;
+    private Button btnNext;
+    private Checklist mChecklist;
+    private static int mCounter = 0;
+    private static TextToSpeech mTts;
+    private static DSChecklistItem mDsChecklistItem;
 
-    public static FragmentChecklistItem newInstance(Checklist checklist) {
-        FragmentChecklistItem fragment = new FragmentChecklistItem();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(CHECKLIST_KEY, checklist);
-        fragment.setArguments(bundle);
 
-        return fragment;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.dynamiclistview);
+
+        if (savedInstanceState == null) {
+            mMyListView = (DynamicListView) findViewById(R.id.fragment_checklist_listview);
+            btnNext = (Button) findViewById(R.id.btnNext);
+            mTts = new TextToSpeech(this, this);
+            mCounter = 0;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mTts != null) {
+            mTts.stop();
+            mTts.shutdown();
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onInit(int status) {
+
+        if (status == TextToSpeech.SUCCESS) {
+
+            int result = mTts.setLanguage(new Locale("pt", "BR"));
+
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            int amStreamMusicMaxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, amStreamMusicMaxVol, 0);
+
+            if (result == TextToSpeech.LANG_MISSING_DATA ||
+                result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Logger.log('e', "This Language is not supported");
+            }
+            else {
+                if (mChecklist != null) {
+                    speakOut(mChecklist.getName());
+                }
+            }
+
+        }
+        else {
+            Logger.log('e', "Initilization Failed!");
+        }
+
+    }
+
+    protected static void speakOut(String text) {
+
+        mTts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
     }
 
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_checklist, container);
-        mMyListView = (DynamicListView) rootView.findViewById(R.id.fragment_checklist_listview);
-        mChecklist = (Checklist) getArguments().getSerializable(CHECKLIST_KEY);
+    protected void onResume() {
+        super.onResume();
+        Bundle b = getIntent().getExtras();
 
-        MyListAdapter adapter = new MyListAdapter(getActivity(), mChecklist);
+        mChecklist = (Checklist) b.getSerializable("EXTRA");
+
+        final MyListAdapter adapter = new MyListAdapter(this, mChecklist);
+
+        mMyListView = (DynamicListView) findViewById(R.id.fragment_checklist_listview);
+        btnNext = (Button) findViewById(R.id.btnNext);
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCounter == mMyListView.getCount() - 1) {
+                    mCounter = 0;
+                }
+                else {
+                    mCounter++;
+                }
+                adapter.setSelectedPosition(mCounter);
+
+            }
+        });
 
         setAdapter(adapter);
         setDragAndDrop(adapter);
+        mMyListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+        Logger.log('e', String.valueOf(mMyListView.getCheckedItemCount()));
 
-        mMyListView.setOnItemClickListener(new MyOnItemClickListener(mMyListView));
-        return super.onCreateView(inflater, container, savedInstanceState);
+        mMyListView.setOnItemClickListener(new MyOnItemClickListener(mMyListView, adapter));
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+
     }
 
     private void setAdapter(MyListAdapter adapter) {
@@ -80,51 +155,27 @@ public class FragmentChecklistItem
     private void setDragAndDrop(MyListAdapter adapter) {
         mMyListView.enableDragAndDrop();
         //mMyListView.setDraggableManager(new TouchViewDraggableManager(R.id.list_row_draganddrop_touchview));
-        mMyListView.setOnItemMovedListener(new MyOnItemMovedListener(getActivity(), adapter));
+        mMyListView.setOnItemMovedListener(new MyOnItemMovedListener(this, adapter));
         mMyListView.setOnItemLongClickListener(new MyOnItemLongClickListener(mMyListView));
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            mListener = (OnFragmentChecklistItemListener) activity;
-        }
-        catch (ClassCastException e) {
-            throw new ClassCastException(
-                    activity.toString() + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        //mListener = null;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mListener = null;
-    }
-
-    public interface OnFragmentChecklistItemListener {
-        void onClickChecklistItem(ChecklistItem checklistItem);
-
-        void onLongClickChecklistItem(int oldPos, int newPos);
     }
 
     private static class MyListAdapter
             extends ArrayAdapter<ChecklistItem> {
 
         private final Context mContext;
+        //private int selectedPos = 0;
 
         MyListAdapter(final Context context, Checklist checklist) {
             mContext = context;
-            DSChecklistItem ds = new DSChecklistItem(context);
-            addAll(ds.getAllChecklistItems(checklist));
-            ds.close();
+            mDsChecklistItem = new DSChecklistItem(context);
+            addAll(mDsChecklistItem.getAllChecklistItems(checklist));
+            mDsChecklistItem.close();
+        }
+
+        public void setSelectedPosition(int pos) {
+            mCounter = pos;
+            notifyDataSetChanged();
+            speakOut(getItem(pos).getName());
         }
 
         @Override
@@ -145,6 +196,17 @@ public class FragmentChecklistItem
                                      .inflate(R.layout.list_row_checklist_item, parent, false);
             }
 
+            // change the row color based on selected state
+            if (mCounter == position) {
+                //view.setBackgroundColor(Color.CYAN);
+                view.setBackgroundResource(R.drawable.selection_selected);
+            }
+            else {
+                //view.setBackgroundColor(Color.LTGRAY);
+                view.setBackgroundResource(R.drawable.selection_normal);
+
+            }
+
             ChecklistItem item = getItem(position);
 
             ((TextView) view.findViewById(R.id.txtItem)).setText(item.getName());
@@ -152,6 +214,7 @@ public class FragmentChecklistItem
             switch (item.getState()) {
             case EMPTY:
                 img.setImageResource(R.drawable.not_ok);
+                img.setVisibility(View.INVISIBLE);
                 break;
             case NOT_OK:
                 img.setImageResource(R.drawable.not_ok);
@@ -175,17 +238,17 @@ public class FragmentChecklistItem
             implements AdapterView.OnItemClickListener {
         private final DynamicListView mListView;
 
-        MyOnItemClickListener(final DynamicListView listView) {
+        private MyListAdapter adapter;
+
+        MyOnItemClickListener(final DynamicListView listView, final MyListAdapter adapter) {
             this.mListView = listView;
+            this.adapter = adapter;
         }
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Logger.log('e', "Clicked!!!!!!!!!!!!!!!!!");
             if (this.mListView != null) {
-                assert mListener != null;
-                mListener.onClickChecklistItem((ChecklistItem) this.mListView.getItemAtPosition(
-                        position));
+                adapter.setSelectedPosition(position);
             }
         }
     }
@@ -216,10 +279,10 @@ public class FragmentChecklistItem
     private class MyOnItemMovedListener
             implements OnItemMovedListener {
 
-        private final ArrayAdapter<ChecklistItem> mAdapter;
+        private final MyListAdapter mAdapter;
         private final Context mContext;
 
-        MyOnItemMovedListener(Context context, final ArrayAdapter<ChecklistItem> adapter) {
+        MyOnItemMovedListener(Context context, final MyListAdapter adapter) {
             mAdapter = adapter;
             mContext = context;
 
@@ -227,15 +290,14 @@ public class FragmentChecklistItem
 
         @Override
         public void onItemMoved(final int originalPosition, final int newPosition) {
-            DSChecklistItem ds = new DSChecklistItem(mContext);
+            mDsChecklistItem = new DSChecklistItem(mContext);
 
-            ds.updateOrder(mAdapter.getItems());
+            mDsChecklistItem.updateOrder(mAdapter.getItems());
 
-            ds.close();
+            mDsChecklistItem.close();
+            mAdapter.setSelectedPosition(mCounter = 0);
 
             mAdapter.notifyDataSetChanged();
         }
     }
-
-
 }
